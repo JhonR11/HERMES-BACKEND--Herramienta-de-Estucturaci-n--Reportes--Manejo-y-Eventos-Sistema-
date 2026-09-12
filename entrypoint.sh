@@ -19,4 +19,4 @@ alembic upgrade head
 echo "Ejecutando seed de administrador..."
 python -m app.infrastructure.db.seed
 echo "Arrancando API..."
-exec uvicorn app.presentation.main:app --host 0.0.0.0 --port 8000
+exec uvicorn app.presentation.main:app --host 0.0.0.0 --port "${PORT:-8000}"
