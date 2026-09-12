@@ -30,6 +30,27 @@ La contraseña se hashea con **bcrypt** en el seed; no hay hashes de ejemplo en 
 4. `GET /api/v1/reportes/categorias` y `POST /api/v1/reportes`.
 5. `GET /api/v1/public/reportes` (sin token) debe mostrar el reporte `ACTIVO`.
 
+### Cambio de contraseña por correo
+
+Configura `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` y
+`SMTP_FROM_EMAIL` en `.env`. Luego el docente solicita el enlace con:
+
+```text
+POST /api/v1/auth/password-reset/request
+{"correo_institucional": "docente@institucion.edu.co"}
+```
+
+El correo contiene un token de un solo uso. La aplicación cliente debe enviar
+ese token junto con la nueva contraseña a:
+
+```text
+POST /api/v1/auth/password-reset/confirm
+{"token": "...", "password_nueva": "nueva-clave-segura"}
+```
+
+Los tokens expiran en `PASSWORD_RESET_TOKEN_EXPIRE_MINUTES` (30 minutos por
+defecto). Al completar el cambio se revocan los refresh tokens existentes.
+
 Colección Postman: `postman_collection.json` (variables `base_url`, `token_admin`, `token_docente`).
 
 ## Decisiones de diseño

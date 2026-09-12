@@ -31,6 +31,15 @@ class Settings(BaseSettings):
     admin_email: str = "admin@institucion.edu.co"
     admin_password: str = "changeme"
 
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_username: str | None = None
+    smtp_password: str | None = None
+    smtp_from_email: str = "no-reply@institucion.edu.co"
+    smtp_from_name: str = "Institución"
+    smtp_start_tls: bool = True
+    password_reset_token_expire_minutes: int = 30
+
     upload_dir: str = "/uploads"
     max_image_bytes: int = 5 * 1024 * 1024
     max_pdf_bytes: int = 10 * 1024 * 1024

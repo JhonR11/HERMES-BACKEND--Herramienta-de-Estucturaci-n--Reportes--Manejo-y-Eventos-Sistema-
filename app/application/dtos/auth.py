@@ -54,6 +54,19 @@ class LogoutRequest(BaseModel):
     refresh_token: str
 
 
+class SolicitarCambioPasswordRequest(BaseModel):
+    correo_institucional: EmailStr
+
+
+class ConfirmarCambioPasswordRequest(BaseModel):
+    token: str = Field(min_length=20)
+    password_nueva: str = Field(min_length=8)
+
+
+class EnviarVistaCorreoRequest(BaseModel):
+    correo_destino: EmailStr
+
+
 class CrearDocenteRequest(BaseModel):
     nombre: str = Field(min_length=2, max_length=150)
     correo_institucional: EmailStr
