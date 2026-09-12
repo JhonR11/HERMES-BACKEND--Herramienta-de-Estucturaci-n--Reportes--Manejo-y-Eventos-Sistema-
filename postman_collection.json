@@ -1,0 +1,501 @@
+{
+  "info": {
+    "name": "API Reportes Docentes, Eventos y Noticias",
+    "description": "Colección de éxito y error para cada módulo. Variables: base_url, token_admin, token_docente, docente_id, reporte_id, evento_id, noticia_id, refresh_admin.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000" },
+    { "key": "token_admin", "value": "" },
+    { "key": "token_docente", "value": "" },
+    { "key": "refresh_admin", "value": "" },
+    { "key": "docente_id", "value": "" },
+    { "key": "reporte_id", "value": "" },
+    { "key": "categoria_id", "value": "" },
+    { "key": "evento_id", "value": "" },
+    { "key": "noticia_id", "value": "" },
+    { "key": "archivo_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login admin (éxito)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('token_admin', j.access_token);",
+                  "pm.collectionVariables.set('refresh_admin', j.refresh_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo_institucional\": \"admin@institucion.edu.co\",\n  \"password\": \"changeme\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/auth/login"
+          }
+        },
+        {
+          "name": "Login (error credenciales)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo_institucional\": \"admin@institucion.edu.co\",\n  \"password\": \"incorrecta\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/auth/login"
+          }
+        },
+        {
+          "name": "Refresh (éxito)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_admin}}\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/auth/refresh"
+          }
+        },
+        {
+          "name": "Refresh (error token)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"token-invalido\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/auth/refresh"
+          }
+        },
+        {
+          "name": "Me (éxito)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "url": "{{base_url}}/api/v1/auth/me"
+          }
+        },
+        {
+          "name": "Me (error sin token)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/auth/me"
+          }
+        },
+        {
+          "name": "Logout (éxito)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_admin}}\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/auth/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Docentes",
+      "item": [
+        {
+          "name": "Crear docente (éxito)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) { pm.collectionVariables.set('docente_id', pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ana Pérez\",\n  \"correo_institucional\": \"ana.perez@institucion.edu.co\",\n  \"cedula_ciudadania\": \"1234567890\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/docentes"
+          }
+        },
+        {
+          "name": "Crear docente (error duplicado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ana Pérez\",\n  \"correo_institucional\": \"ana.perez@institucion.edu.co\",\n  \"cedula_ciudadania\": \"1234567890\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/docentes"
+          }
+        },
+        {
+          "name": "Login docente (éxito)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) { pm.collectionVariables.set('token_docente', pm.response.json().access_token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo_institucional\": \"ana.perez@institucion.edu.co\",\n  \"password\": \"1234567890\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/auth/login"
+          }
+        },
+        {
+          "name": "Listar docentes (éxito)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_docente}}" }],
+            "url": "{{base_url}}/api/v1/docentes"
+          }
+        },
+        {
+          "name": "Obtener docente (éxito)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "url": "{{base_url}}/api/v1/docentes/{{docente_id}}"
+          }
+        },
+        {
+          "name": "Obtener docente (error no encontrado)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "url": "{{base_url}}/api/v1/docentes/00000000-0000-0000-0000-000000000000"
+          }
+        },
+        {
+          "name": "Actualizar perfil (éxito)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_docente}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ana María Pérez\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/docentes/{{docente_id}}"
+          }
+        },
+        {
+          "name": "Desactivar docente (éxito)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "url": "{{base_url}}/api/v1/docentes/{{docente_id}}/activo?activo=true"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reportes",
+      "item": [
+        {
+          "name": "Listar categorías (éxito)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) { const j = pm.response.json(); if (j.length) pm.collectionVariables.set('categoria_id', j[0].id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_docente}}" }],
+            "url": "{{base_url}}/api/v1/reportes/categorias"
+          }
+        },
+        {
+          "name": "Crear reporte (éxito)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) { pm.collectionVariables.set('reporte_id', pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_docente}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_reporte\": \"Jornada de proyección social\",\n  \"descripcion_detallada\": \"Actividades realizadas con la comunidad durante el semestre.\",\n  \"categoria_id\": \"{{categoria_id}}\",\n  \"docentes_asociados\": [\"{{docente_id}}\"]\n}"
+            },
+            "url": "{{base_url}}/api/v1/reportes"
+          }
+        },
+        {
+          "name": "Crear reporte (error sin token docente)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_reporte\": \"No debe crearse\",\n  \"descripcion_detallada\": \"El administrador no crea reportes docentes.\",\n  \"categoria_id\": \"{{categoria_id}}\",\n  \"docentes_asociados\": []\n}"
+            },
+            "url": "{{base_url}}/api/v1/reportes"
+          }
+        },
+        {
+          "name": "Listar reportes (éxito)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_docente}}" }],
+            "url": "{{base_url}}/api/v1/reportes"
+          }
+        },
+        {
+          "name": "Obtener reporte (éxito)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_docente}}" }],
+            "url": "{{base_url}}/api/v1/reportes/{{reporte_id}}"
+          }
+        },
+        {
+          "name": "Obtener reporte (error no encontrado)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "url": "{{base_url}}/api/v1/reportes/00000000-0000-0000-0000-000000000000"
+          }
+        },
+        {
+          "name": "Editar reporte (éxito)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_docente}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_reporte\": \"Jornada de proyección social (actualizada)\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/reportes/{{reporte_id}}"
+          }
+        },
+        {
+          "name": "Dashboard admin (éxito)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "url": "{{base_url}}/api/v1/admin/reportes/dashboard?fecha_inicio=2026-01-01T00:00:00Z&fecha_fin=2026-12-31T23:59:59Z"
+          }
+        },
+        {
+          "name": "Dashboard admin (error docente)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_docente}}" }],
+            "url": "{{base_url}}/api/v1/admin/reportes/dashboard?fecha_inicio=2026-01-01T00:00:00Z&fecha_fin=2026-12-31T23:59:59Z"
+          }
+        },
+        {
+          "name": "Deshabilitar reporte (éxito)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"ACTIVO\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/admin/reportes/{{reporte_id}}/estado"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Eventos",
+      "item": [
+        {
+          "name": "Crear evento (éxito)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) { pm.collectionVariables.set('evento_id', pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "nombre_evento", "value": "Semana cultural", "type": "text" },
+                { "key": "descripcion", "value": "Evento institucional abierto a toda la comunidad.", "type": "text" },
+                { "key": "fecha_inicio", "value": "2026-10-01T08:00:00+00:00", "type": "text" },
+                { "key": "fecha_fin", "value": "2026-10-05T18:00:00+00:00", "type": "text" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/eventos"
+          }
+        },
+        {
+          "name": "Crear evento (error fechas)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "nombre_evento", "value": "Evento inválido", "type": "text" },
+                { "key": "descripcion", "value": "La fecha fin es anterior al inicio.", "type": "text" },
+                { "key": "fecha_inicio", "value": "2026-10-10T08:00:00+00:00", "type": "text" },
+                { "key": "fecha_fin", "value": "2026-10-01T18:00:00+00:00", "type": "text" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/eventos"
+          }
+        },
+        {
+          "name": "Listar eventos admin (éxito)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "url": "{{base_url}}/api/v1/eventos"
+          }
+        },
+        {
+          "name": "Obtener evento (error no encontrado)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "url": "{{base_url}}/api/v1/eventos/00000000-0000-0000-0000-000000000000"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Noticias",
+      "item": [
+        {
+          "name": "Crear noticia (éxito)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) { pm.collectionVariables.set('noticia_id', pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "titular", "value": "Apertura de inscripciones", "type": "text" },
+                { "key": "descripcion_noticia", "value": "Ya se encuentran abiertas las inscripciones del próximo periodo.", "type": "text" },
+                { "key": "link_opcional", "value": "https://institucion.edu.co/noticias", "type": "text" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/noticias"
+          }
+        },
+        {
+          "name": "Crear noticia (error docente)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_docente}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "titular", "value": "No permitido", "type": "text" },
+                { "key": "descripcion_noticia", "value": "Los docentes no gestionan noticias institucionales.", "type": "text" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/noticias"
+          }
+        },
+        {
+          "name": "Listar noticias admin (éxito)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "url": "{{base_url}}/api/v1/noticias"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Público",
+      "item": [
+        {
+          "name": "Reportes públicos (éxito)",
+          "request": { "method": "GET", "url": "{{base_url}}/api/v1/public/reportes" }
+        },
+        {
+          "name": "Eventos públicos (éxito)",
+          "request": { "method": "GET", "url": "{{base_url}}/api/v1/public/eventos" }
+        },
+        {
+          "name": "Noticias públicas (éxito)",
+          "request": { "method": "GET", "url": "{{base_url}}/api/v1/public/noticias" }
+        },
+        {
+          "name": "Health",
+          "request": { "method": "GET", "url": "{{base_url}}/health" }
+        }
+      ]
+    }
+  ]
+}
